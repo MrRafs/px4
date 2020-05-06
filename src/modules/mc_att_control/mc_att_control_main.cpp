@@ -154,8 +154,12 @@ MulticopterAttitudeControl::generate_attitude_setpoint(float dt, bool reset_yaw_
 	 * This allows a simple limitation of the tilt angle, the vehicle flies towards the direction that the stick
 	 * points to, and changes of the stick input are linear.
 	 */
-	const float x = _manual_control_sp.x * _man_tilt_max;
-	const float y = _manual_control_sp.y * _man_tilt_max;
+	_man_x_input_filter.setParameters(dt, _param_mc_man_tilt_tau.get());
+	_man_y_input_filter.setParameters(dt, _param_mc_man_tilt_tau.get());
+	_man_x_input_filter.update(_manual_control_sp.x * _man_tilt_max);
+	_man_y_input_filter.update(_manual_control_sp.y * _man_tilt_max);
+	const float x = _man_x_input_filter.getState();
+	const float y = _man_y_input_filter.getState();
 
 	// we want to fly towards the direction of (x, y), so we use a perpendicular axis angle vector in the XY-plane
 	Vector2f v = Vector2f(y, -x);
